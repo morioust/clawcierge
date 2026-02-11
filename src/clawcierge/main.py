@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from clawcierge.config import settings
 from clawcierge.database import engine
 from clawcierge.middleware.errors import register_exception_handlers
+from clawcierge.routes.admin import router as admin_router
 from clawcierge.routes.agent_ws import router as agent_ws_router
 from clawcierge.routes.agents import router as agents_router
 from clawcierge.routes.capabilities import router as capabilities_router
@@ -49,3 +50,4 @@ app.include_router(capabilities_router)
 app.include_router(policies_router)
 app.include_router(requests_router)
 app.include_router(agent_ws_router)
+app.include_router(admin_router)

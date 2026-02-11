@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard - Clawcierge</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background: #f5f5f5; padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        h1 { font-size: 1.5rem; color: #333; }
+        .logout { color: #2563eb; text-decoration: none; font-size: 0.875rem; }
+        .logout:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f9fafb; font-size: 0.75rem; text-transform: uppercase; color: #666; letter-spacing: 0.05em; }
+        td { font-size: 0.875rem; color: #333; }
+        .status { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-inactive { background: #f3f4f6; color: #6b7280; }
+        .btn-delete { background: #dc2626; color: #fff; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
+        .btn-delete:hover { background: #b91c1c; }
+        .empty { text-align: center; padding: 2rem; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Agents ({{ agents|length }})</h1>
+        <a href="/admin/logout" class="logout">Log out</a>
+    </div>
+    {% if agents %}
+    <table>
+        <thead>
+            <tr>
+                <th>Handle</th>
+                <th>Display Name</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Heartbeat</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for agent in agents %}
+            <tr>
+                <td>{{ agent.handle.handle if agent.handle else "—" }}</td>
+                <td>{{ agent.display_name }}</td>
+                <td><span class="status status-{{ agent.status }}">{{ agent.status }}</span></td>
+                <td>{{ agent.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td>{{ agent.last_heartbeat or agent.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td>
+                    <form method="post" action="/admin/agents/{{ agent.id }}/delete" style="display:inline" onsubmit="return confirm('Delete this agent?')">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">No agents registered.</div>
+    {% endif %}
+</body>
+</html>

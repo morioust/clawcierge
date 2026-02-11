@@ -26,11 +26,15 @@ class Agent(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
-    handle: Mapped["Handle | None"] = relationship(back_populates="agent", uselist=False)
-    capability_contracts: Mapped[list["CapabilityContract"]] = relationship(  # noqa: F821
-        back_populates="agent"
+    handle: Mapped["Handle | None"] = relationship(
+        back_populates="agent", uselist=False, passive_deletes=True
     )
-    policies: Mapped[list["Policy"]] = relationship(back_populates="agent")  # noqa: F821
+    capability_contracts: Mapped[list["CapabilityContract"]] = relationship(  # noqa: F821
+        back_populates="agent", passive_deletes=True
+    )
+    policies: Mapped[list["Policy"]] = relationship(  # noqa: F821
+        back_populates="agent", passive_deletes=True
+    )
 
 
 class Handle(Base):
