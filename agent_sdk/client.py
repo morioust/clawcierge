@@ -157,9 +157,8 @@ class ClawciergeAgent:
         """Look up another agent by handle. Returns agent metadata and capabilities."""
         self._ensure_http_config()
         async with httpx.AsyncClient() as http:
-            resp = await http.post(
-                f"{self._platform_url}/v1/directory/resolve",
-                json={"handle": handle},
+            resp = await http.get(
+                f"{self._platform_url}/v1/directory/{handle}",
             )
             resp.raise_for_status()
             return resp.json()

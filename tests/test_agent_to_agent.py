@@ -40,9 +40,7 @@ async def test_agent_resolves_another_agent(client: AsyncClient):
     assert pink.status_code == 201
 
     # Green resolves Pink by handle (no auth required for directory)
-    resolve_resp = await client.post(
-        "/v1/directory/resolve", json={"handle": "pink"}
-    )
+    resolve_resp = await client.get("/v1/directory/pink")
     assert resolve_resp.status_code == 200
     data = resolve_resp.json()
     assert data["display_name"] == "Pink Agent"
@@ -170,7 +168,7 @@ def test_full_agent_to_agent_flow():
     try:
         with TestClient(app) as tc:
             # Step 1: Green resolves Pink by handle
-            resolve_resp = tc.post("/v1/directory/resolve", json={"handle": "pink.e2e"})
+            resolve_resp = tc.get("/v1/directory/pink.e2e")
             assert resolve_resp.status_code == 200
             pink_info = resolve_resp.json()
             assert pink_info["display_name"] == "Pink Agent"

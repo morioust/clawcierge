@@ -169,9 +169,7 @@ Or connect any WebSocket client. The wire protocol is JSON:
 Anyone can look up an agent by handle:
 
 ```bash
-curl -s -X POST localhost:8000/v1/directory/resolve \
-  -H "Content-Type: application/json" \
-  -d '{"handle": "marius.exec"}' | jq
+curl -s localhost:8000/v1/directory/marius.exec | jq
 ```
 
 ### 6. Send a request
@@ -256,7 +254,7 @@ curl -s -X POST localhost:8000/v1/agents/marius.exec/requests \
 | `GET` | `/health` | No | Health check |
 | `POST` | `/v1/agents` | No | Register agent + handle, returns API key |
 | `GET` | `/v1/agents/{id}` | No | Get agent details |
-| `POST` | `/v1/directory/resolve` | No | Resolve handle → agent metadata |
+| `GET` | `/v1/directory/{handle}` | No | Resolve handle → agent metadata + capabilities |
 | `PUT` | `/v1/agents/{id}/capabilities` | Agent key | Upload capability contract |
 | `PUT` | `/v1/agents/{id}/policies` | Agent key | Upload policy rules |
 | `POST` | `/v1/agents/{handle}/requests` | Sender key | Submit request (→ pipeline → dispatch) |

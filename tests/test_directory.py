@@ -8,10 +8,7 @@ async def test_resolve_handle(client: AsyncClient):
     )
     assert create.status_code == 201
 
-    response = await client.post(
-        "/v1/directory/resolve",
-        json={"handle": "resolve.me"},
-    )
+    response = await client.get("/v1/directory/resolve.me")
     assert response.status_code == 200
     data = response.json()
     assert data["display_name"] == "Resolve Me"
@@ -20,8 +17,5 @@ async def test_resolve_handle(client: AsyncClient):
 
 
 async def test_resolve_nonexistent(client: AsyncClient):
-    response = await client.post(
-        "/v1/directory/resolve",
-        json={"handle": "does.not.exist"},
-    )
+    response = await client.get("/v1/directory/does.not.exist")
     assert response.status_code == 404

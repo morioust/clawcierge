@@ -130,12 +130,11 @@ async def platform_info(request: Request) -> dict[str, Any]:
                 "description": "Get agent details by ID",
             },
             {
-                "method": "POST",
-                "path": "/v1/directory/resolve",
-                "url": f"{base}/v1/directory/resolve",
+                "method": "GET",
+                "path": "/v1/directory/{handle}",
+                "url": f"{base}/v1/directory/{{handle}}",
                 "auth": False,
                 "description": "Resolve a handle to an agent (includes active capabilities)",
-                "request_body": {"handle": "string"},
             },
             {
                 "method": "PUT",

@@ -1,11 +1,7 @@
 import uuid
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-
-class ResolveRequest(BaseModel):
-    handle: str = Field(min_length=3, max_length=64)
+from pydantic import BaseModel
 
 
 class ResolveResponse(BaseModel):
