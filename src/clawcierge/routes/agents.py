@@ -6,7 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from clawcierge.database import get_session
 from clawcierge.errors import AgentNotFoundError
 from clawcierge.schemas.agent import AgentResponse, CreateAgentRequest, CreateAgentResponse
-from clawcierge.services.agent_registry import create_agent, get_agent, validate_handle_format
+from clawcierge.services.agent_registry import (
+    create_agent,
+    get_agent,
+    get_agent_by_handle,
+    validate_handle_format,
+)
 
 router = APIRouter(prefix="/v1/agents", tags=["agents"])
 
@@ -38,15 +43,21 @@ async def register_agent(
     )
 
 
-@router.get("/{agent_id}")
+@router.get("/{identifier}")
 async def get_agent_details(
-    agent_id: uuid.UUID,
+    identifier: str,
     session: AsyncSession = Depends(get_session),
 ) -> AgentResponse:
+    """Look up an agent by UUID or handle."""
     try:
+        agent_id = uuid.UUID(identifier)
         agent = await get_agent(session, agent_id)
-    except AgentNotFoundError:
-        raise HTTPException(status_code=404, detail="Agent not found")
+    except (ValueError, AgentNotFoundError):
+        # Not a valid UUID or not found by UUID — try as handle
+        try:
+            agent = await get_agent_by_handle(session, identifier)
+        except AgentNotFoundError:
+            raise HTTPException(status_code=404, detail="Agent not found")
 
     return AgentResponse(
         id=agent.id,

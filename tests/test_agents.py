@@ -41,6 +41,22 @@ async def test_get_agent(client: AsyncClient):
     assert data["handle"] == "get.agent"
 
 
+async def test_get_agent_by_handle(client: AsyncClient):
+    """GET /v1/agents/{handle} should work with a handle string, not just UUID."""
+    create = await client.post(
+        "/v1/agents",
+        json={"display_name": "Handle Lookup", "handle": "handle.lookup"},
+    )
+    assert create.status_code == 201
+
+    response = await client.get("/v1/agents/handle.lookup")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["display_name"] == "Handle Lookup"
+    assert data["handle"] == "handle.lookup"
+    assert data["id"] == create.json()["id"]
+
+
 async def test_get_agent_not_found(client: AsyncClient):
     response = await client.get("/v1/agents/00000000-0000-0000-0000-000000000000")
     assert response.status_code == 404

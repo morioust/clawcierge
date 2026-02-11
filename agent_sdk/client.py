@@ -4,6 +4,7 @@ import signal
 from collections.abc import Awaitable, Callable
 from typing import Any
 
+import httpx
 import structlog
 import websockets
 from websockets.asyncio.client import ClientConnection
@@ -14,10 +15,12 @@ RequestHandler = Callable[[str, dict[str, Any], str], Awaitable[dict[str, Any]]]
 
 
 class ClawciergeAgent:
-    def __init__(self) -> None:
+    def __init__(self, platform_url: str | None = None, api_key: str | None = None) -> None:
         self._handler: RequestHandler | None = None
         self._ws: ClientConnection | None = None
         self._running = False
+        self._platform_url = platform_url.rstrip("/") if platform_url else None
+        self._api_key = api_key
 
     def on_request(self, handler: RequestHandler) -> None:
         """Register a handler for incoming requests.
@@ -140,3 +143,48 @@ class ClawciergeAgent:
                     }
                 )
             )
+
+    # --- HTTP client methods for agent-to-agent communication ---
+
+    def _ensure_http_config(self) -> None:
+        if not self._platform_url or not self._api_key:
+            raise RuntimeError(
+                "platform_url and api_key must be set to use HTTP methods. "
+                "Pass them to ClawciergeAgent(platform_url=..., api_key=...)"
+            )
+
+    async def resolve(self, handle: str) -> dict[str, Any]:
+        """Look up another agent by handle. Returns agent metadata and capabilities."""
+        self._ensure_http_config()
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{self._platform_url}/v1/directory/resolve",
+                json={"handle": handle},
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+    async def send_request(
+        self, handle: str, action: str, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Send a request to another agent by handle. Returns the request receipt (id, status)."""
+        self._ensure_http_config()
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{self._platform_url}/v1/agents/{handle}/requests",
+                headers={"Authorization": f"Bearer {self._api_key}"},
+                json={"action": action, "params": params or {}},
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+    async def poll_request(self, request_id: str) -> dict[str, Any]:
+        """Poll for the status/result of a previously sent request."""
+        self._ensure_http_config()
+        async with httpx.AsyncClient() as http:
+            resp = await http.get(
+                f"{self._platform_url}/v1/requests/{request_id}",
+                headers={"Authorization": f"Bearer {self._api_key}"},
+            )
+            resp.raise_for_status()
+            return resp.json()
