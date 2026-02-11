@@ -43,8 +43,8 @@
         <tbody>
             {% for agent in agents %}
             <tr>
-                <td>{{ agent.handle.handle if agent.handle else "—" }}</td>
-                <td>{{ agent.display_name }}</td>
+                <td><a href="/admin/agents/{{ agent.id }}" style="color:#2563eb;text-decoration:none;">{{ agent.handle.handle if agent.handle else "—" }}</a></td>
+                <td><a href="/admin/agents/{{ agent.id }}" style="color:#333;text-decoration:none;">{{ agent.display_name }}</a></td>
                 <td><span class="status status-{{ agent.status }}">{{ agent.status }}</span></td>
                 <td>{{ agent.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
                 <td>{{ agent.last_heartbeat or agent.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>

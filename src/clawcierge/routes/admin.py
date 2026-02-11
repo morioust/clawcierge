@@ -11,6 +11,8 @@ from sqlalchemy.orm import selectinload
 
 from clawcierge.database import get_session
 from clawcierge.models.agent import Agent
+from clawcierge.models.capability import CapabilityContract
+from clawcierge.models.policy import Policy
 from clawcierge.services.connection_manager import connection_manager
 
 ADMIN_PASSWORD = "oiaerjv0a8erh3248f34"
@@ -72,6 +74,55 @@ async def dashboard(
             agent.last_heartbeat = None  # type: ignore[attr-defined]
 
     return templates.TemplateResponse(request, "admin_dashboard.html", {"agents": agents})
+
+
+@router.get("/agents/{agent_id}", response_class=HTMLResponse)
+async def agent_detail(
+    request: Request,
+    agent_id: uuid.UUID,
+    is_admin: bool = Depends(_verify_cookie),
+    session: AsyncSession = Depends(get_session),
+):
+    if not is_admin:
+        return RedirectResponse("/admin/login", status_code=303)
+
+    result = await session.execute(
+        select(Agent).options(selectinload(Agent.handle)).where(Agent.id == agent_id)
+    )
+    agent = result.scalar_one_or_none()
+    if not agent:
+        return RedirectResponse("/admin/", status_code=303)
+
+    # Active capability contract
+    cap_result = await session.execute(
+        select(CapabilityContract)
+        .where(CapabilityContract.agent_id == agent_id, CapabilityContract.is_active.is_(True))
+    )
+    active_contract = cap_result.scalar_one_or_none()
+    capabilities = active_contract.capabilities if active_contract else []
+
+    # Active policy
+    pol_result = await session.execute(
+        select(Policy)
+        .where(Policy.agent_id == agent_id, Policy.is_active.is_(True))
+    )
+    active_policy = pol_result.scalar_one_or_none()
+    policy_rules = active_policy.rules if active_policy else []
+
+    # Connection info
+    conn = connection_manager.get_connection(agent_id)
+    heartbeat = conn.last_heartbeat.strftime("%Y-%m-%d %H:%M UTC") if conn else None
+    is_connected = conn is not None
+
+    return templates.TemplateResponse(request, "admin_agent_detail.html", {
+        "agent": agent,
+        "active_contract": active_contract,
+        "capabilities": capabilities,
+        "active_policy": active_policy,
+        "policy_rules": policy_rules,
+        "heartbeat": heartbeat,
+        "is_connected": is_connected,
+    })
 
 
 @router.post("/agents/{agent_id}/delete")
