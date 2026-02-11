@@ -12,6 +12,7 @@ from clawcierge.routes.agents import router as agents_router
 from clawcierge.routes.capabilities import router as capabilities_router
 from clawcierge.routes.directory import router as directory_router
 from clawcierge.routes.health import router as health_router
+from clawcierge.routes.info import router as info_router
 from clawcierge.routes.policies import router as policies_router
 from clawcierge.routes.requests import router as requests_router
 
@@ -41,6 +42,7 @@ app = FastAPI(title="Clawcierge", version="0.1.0", lifespan=lifespan)
 register_exception_handlers(app)
 
 app.include_router(health_router)
+app.include_router(info_router)
 app.include_router(agents_router)
 app.include_router(directory_router)
 app.include_router(capabilities_router)
