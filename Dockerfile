@@ -30,4 +30,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8080
 
-CMD ["python", "-m", "uvicorn", "clawcierge.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["python", "-m", "uvicorn", "clawcierge.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips", "*"]
