@@ -58,7 +58,7 @@ curl localhost:8000/health
 ## Running Tests
 
 ```bash
-uv run pytest                  # all 36 tests
+uv run pytest                  # all 50 tests
 uv run pytest -v               # verbose
 uv run pytest tests/test_pipeline.py  # specific file
 ```
@@ -262,6 +262,11 @@ curl -s -X POST localhost:8000/v1/agents/marius.exec/requests \
 | `POST` | `/v1/agents/{handle}/requests` | Sender key | Submit request (→ pipeline → dispatch) |
 | `GET` | `/v1/requests/{id}` | Sender key | Poll for request result |
 | `WS` | `/v1/agents/{id}/ws?token=` | Agent key | Agent WebSocket channel |
+| `GET` | `/admin/login` | No | Admin login page |
+| `POST` | `/admin/login` | No | Admin login (sets cookie) |
+| `GET` | `/admin/` | Cookie | Admin dashboard (list agents) |
+| `POST` | `/admin/agents/{id}/delete` | Cookie | Delete agent |
+| `GET` | `/admin/logout` | No | Admin logout (clears cookie) |
 
 Auto-generated OpenAPI docs available at `http://localhost:8000/docs` when the server is running.
 
@@ -278,12 +283,13 @@ src/clawcierge/
 ├── services/                  # Business logic (key_manager, agent_registry, ...)
 ├── pipeline/                  # Enforcement pipeline (executor, policy, capability)
 ├── routes/                    # FastAPI route handlers
+├── templates/                 # Jinja2 templates (admin UI)
 └── middleware/                # Auth dependency, exception handlers
 
 agent_sdk/                     # Lightweight Python SDK for agent authors
 └── examples/calendar_agent.py # Reference agent implementation
 
-tests/                         # 36 tests (pytest + pytest-asyncio)
+tests/                         # 50 tests (pytest + pytest-asyncio)
 ```
 
 ## Configuration
@@ -303,8 +309,8 @@ All settings are loaded from environment variables (or `.env` file). See [`.env.
 
 ## Tech Stack
 
-Python 3.12, FastAPI, SQLAlchemy 2.0 (async), PostgreSQL 16, Pydantic v2, simpleeval, jsonschema, structlog, uvicorn, uv, pytest, ruff.
+Python 3.12, FastAPI, SQLAlchemy 2.0 (async), PostgreSQL 16, Pydantic v2, Jinja2, itsdangerous, simpleeval, jsonschema, structlog, uvicorn, uv, pytest, ruff.
 
 ## What's Next
 
-Rate limiting, prompt firewall, audit logging, reputation scoring, human approval flow, admin UI, real calendar integrations.
+Rate limiting, prompt firewall, audit logging, reputation scoring, human approval flow, real calendar integrations.
